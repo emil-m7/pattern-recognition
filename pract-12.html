@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Программа к практическому занятию 12</title>
+	<style>
+		.nav {
+			top: 8px;
+			position: sticky;
+		}
+
+		.nav_outer {
+			background-color: white;
+			box-shadow: 0 0 4px 0px #a3a3a3;
+			border-radius: 5px;
+		}
+
+		.nav_inner {
+			padding: 10px;
+		}
+
+		.scene__outer {
+			padding: 20px 0;
+		}
+
+		@media (min-width: 680px) {
+			.scene__inner.--show-ui {
+				display: flex;
+				justify-content: center;
+			}
+		}
+
+		.scene__canvas-gallery {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.scene__canvas-wrp {
+			padding: 0 10px 20px;
+		}
+
+		.scene__canvas-gallery canvas {
+			box-shadow: 0 0 4px 0px #a3a3a3;
+			border-radius: 5px;
+		}
+
+		.scene__ui-buttons {
+			display: none;
+			flex-direction: column;
+			padding-left: 30px;
+		}
+
+		@media (min-width: 680px) {
+			.scene__inner.--show-ui .scene__ui-buttons {
+				display: flex;
+			}
+		}
+
+		.scene__btn {
+			padding: 10px 20px
+		}
+
+		.scene__btn+.scene__btn {
+			margin-top: 20px;
+		}
+
+		hr {
+			width: 100%;
+			margin: 20px 0;
+		}
+
+		.dn {
+			display: none;
+		}
+
+		.--restart {
+			font-weight: bold;
+		}
+
+		.statistics__outer {
+			color: #322f2f;
+			font-size: 13px;
+			font-family: 'Consolas', 'Courier New', Courier, monospace;
+			padding: 10px 0 0;
+		}
+
+		.danger {
+			color: red;
+			font-weight: bold;
+		}
+
+		.resres {
+			display: flex;
+			justify-content: center;
+			padding: 10px 0;
+		}
+
+		.resres canvas {
+			box-shadow: 0 0 4px 0px #a3a3a3;
+			border-radius: 5px;
+		}
+
+		.resres__canvas-wrp {
+			padding: 0 10px 20px;
+		}
+	</style>
+</head>
+
+<body>
+	<nav class="nav">
+		<div class="nav_outer">
+			<div class="nav_inner">
+				<button class="nav-btn --restart" onclick="location=location">Перезагрузить</button>
+				<span> | </span>
+				<button class="nav-btn --next">Новый образ</button>
+				<button class="nav-btn --clear">Очистить холст</button>
+				<button class="nav-btn --solve">Найти эталон</button>
+				<span> | </span>
+				<label>
+					<select id="line_width">
+						<option>Ширина линии</option>
+						<option value="1">1</option>
+						<option value="3">3</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+					</select>
+				</label>
+			</div>
+		</div>
+	</nav>
+
+	<div class="statistics">
+		<div class="statistics__outer">
+			<div class="statistics_inner">
+				<table>
+					<tr class="images-count">
+						<td>Images:</td>
+						<td>0</td>
+					</tr>
+					<tr class="process-time dn">
+						<td>Processing time:</td>
+						<td>0</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<center><button class="show-images" id="shwbtns">Показать все образы</button></center>
+	<div class="scene">
+		<div class="scene__outer">
+			<div class="scene__inner --show-ui">
+				<div class="scene__canvas-gallery"></div>
+				<div class="scene__ui-buttons">
+					<button class="scene__btn --clear">Очистить холст</button>
+					<button class="scene__btn --next">Новый образ</button>
+					<hr>
+					<button class="scene__btn --solve">Найти эталон</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<h1 class="dn">Результат</h1>
+	<div class="resres"></div>
+
+	<script>
+
+		// библиотека для работы с Canvas
+		function Sketch(t=50,e=50,n={}){const i=document.createElement("canvas");i.setAttribute("height",e),i.setAttribute("width",t),i.setAttribute("tabindex","-1");const o=i.getContext("2d");this.cnv=i,this.ctx=o,this.insert_into=function(t="body",e=!0){let n=document.querySelector(t);return n&&(e?n.append(i):n.prepend(i)),this},n.insert_into&&this.insert_into(n.insert_into);let r=!1;function s(t){o.beginPath();let e=i.getBoundingClientRect();function n(t){o.lineTo(t.clientX-e.x,t.clientY-e.y),o.stroke()}o.moveTo(t.clientX-e.x,t.clientY-e.y),document.addEventListener("pointermove",n),document.addEventListener("pointerup",function i(r){if(t.clientX==r.clientX&&t.clientY==r.clientY){let t=o.fillStyle;o.fillStyle=o.strokeStyle,o.fillRect(r.clientX-e.x-1,r.clientY-e.y-1,2,2),o.fillStyle=t}document.removeEventListener("pointermove",n),document.removeEventListener("pointerup",i)})}this.drawing_mode=r,this.enable_drawing_mode=function(){return r?this:(i.addEventListener("pointerdown",s),i.style.touchAction="none",i.style.userSelect="none",this.drawing_mode=r=!0,this)},this.disable_drawing_mode=function(){return r?(i.removeEventListener("pointerdown",s),i.style.touchAction="",i.style.userSelect="",this.drawing_mode=r=!1,this):this},this.switch_drawing_mode=function(t=null){return!0===t?this.enable_drawing_mode():!1===t?this.disable_drawing_mode():null===t&&(r?this.disable_drawing_mode():this.enable_drawing_mode()),this},n.drawing_mode&&!0===n.drawing_mode&&this.enable_drawing_mode(),this.rect=function(t=0,e=0,n=1,i=1){o.fillRect(t,e,n,i)},this.dot=function(t=0,e=0){this.rect(t,e,1,1)},this.clear=function(){o.clearRect(0,0,t,e)}}
+
+		// дополнительные вспомогательные функции
+		function crtElm(e,t,n){var r=document.createElement(e);if(t)if("string"==typeof t)r.setAttribute("class",t);else for(key in t)r.setAttribute(key,t[key]);return n&&(Array.isArray(n)?n.forEach(function(e){"object"==typeof e&&"HTML"in e?r.insertAdjacentHTML("beforeend",e.HTML):(e instanceof HTMLElement||"string"==typeof e)&&r.append(e)}):"object"==typeof n&&"HTML"in n?r.insertAdjacentHTML("beforeend",n.HTML):(n instanceof HTMLElement||"string"==typeof n)&&r.append(n)),r}function _timeConvert(e){var t=0,n=0,r=0,i=0;(e/=1e3)>=3600&&e>60?(n=(e-e%3600)/3600,(t=e%3600)>=60?(r=(t-t%60)/60,i=t%60):i=t):e<3600&&e>=60?(r=(e-e%60)/60,i=e%60):i=e;var o="";return 0!=n&&(o+=n+"h "),0!=r&&(o+=r+"m "),0!=i&&(o+=i+"s"),o}Array.prototype.last=function(){return this[this.length-1]};
+
+		/***
+		 * Программв
+		 * */
+
+		const M = 300;
+		const N = 300;
+		const sketches = [];
+
+		let fl_onresult = false;
+
+		let lw = 1;
+		document.getElementById('line_width').addEventListener('change', function () {
+			if (isNaN(this.value)) return;
+			lw = +this.value;
+			sketches.last().ctx.lineWidth = lw;
+		});
+
+		function find_model() {
+			let start = Date.now();
+
+			const L = sketches.length;
+
+			const vectors = [];
+			for (let i = 0; i < N; i++) {
+				vectors.push([]);
+				for (let j = 0; j < L; j++) {
+					vectors[i].push([]);
+					for (let k = 0; k < M; k++) {
+						vectors[i][j].push(0);
+					}
+				}
+			}
+
+			sketches.forEach(function (sketch, l) {
+
+				let img_data = sketch.ctx.getImageData(0, 0, M, N);
+				img_data = img_data.data;
+
+				for (let jj = 3; jj < img_data.length; jj += 4) {
+					if (img_data[jj] > 125) {
+						let j = (jj - 3) / 4;
+						let n = Math.trunc(j / N);
+						let m = j % M;
+
+						vectors[n][l][m] = 1;
+					}
+				}
+
+			});
+
+			const z_vector = [];
+
+			vectors.forEach(function (arr) {
+				for (let i = 0; i < M; i++) {
+					let sum = 0;
+					for (let j = 0; j < L; j++) {
+						sum += arr[j][i];
+					}
+					z_vector.push(sum);
+				}
+			});
+
+			let S = z_vector.reduce((a, b) => a + b);
+			let t = z_vector.reduce((a, b) => a + (b > 0 ? 1 : 0));
+
+			let p = S / t;
+
+			let res_model = new Sketch(M, N);
+
+			z_vector.forEach(function (el, i) {
+				if (el > p) {
+					let n = Math.trunc(i / N);
+					let m = i % M;
+					res_model.dot(m, n);
+				}
+			});
+
+			let end = Date.now() - start;
+
+
+			document.querySelector('.scene__canvas-gallery > div:last-child').classList.add('dn');
+			sketches.last().disable_drawing_mode();
+
+			document.querySelector('.process-time').classList.remove('dn');
+			document.querySelector('.process-time td:last-child').innerHTML = _timeConvert(end);
+
+			document.querySelector('.resres').append(
+				crtElm('div', 'resres__canvas-wrp', res_model.cnv)
+			);
+
+			fl_onresult = true;
+		}
+
+		function new_sketch() {
+			sketches.push(new Sketch(M, N, {
+				drawing_mode: true
+			}));
+
+			sketches.last().ctx.lineWidth = lw;
+
+			document.querySelector('.scene__canvas-gallery').append(
+				crtElm('div', 'scene__canvas-wrp', sketches.last().cnv)
+			);
+
+			document.querySelector('.images-count td:last-child').innerHTML = sketches.length;
+		}
+
+		document.querySelectorAll('.--clear').forEach(function (el) {
+			el.addEventListener('click', function () {
+				if (sketches.length)
+					sketches.last().clear();
+			});
+		});
+
+		document.querySelectorAll('.--next').forEach(function (el) {
+			el.addEventListener('click', function () {
+				document.querySelector('.scene__canvas-gallery > div:last-child').classList.add('dn');
+				sketches.last().disable_drawing_mode();
+				new_sketch();
+			});
+		});
+
+		document.querySelectorAll('.--solve').forEach(function (el) {
+			el.addEventListener('click', function () {
+				document.querySelectorAll('.--clear').forEach(el => el.setAttribute('disabled', true));
+				document.querySelectorAll('.--next').forEach(el => el.setAttribute('disabled', true));
+				document.querySelectorAll('.--solve').forEach(el => el.setAttribute('disabled', true));
+				document.querySelector('.scene__inner.--show-ui').classList.remove('--show-ui');
+				sketches.last().disable_drawing_mode();
+
+				find_model();
+			});
+		});
+
+		shwbtns.addEventListener('click', function () {
+			selector = `.scene__canvas-wrp${!fl_onresult?':not(:last-child)':''}`;
+			document.querySelectorAll(selector).forEach(function (el) {
+				el.classList.toggle('dn')
+			});
+		});
+
+		new_sketch();
+	</script>
+</body>
+
+</html>
